@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>🌱 Team Energy & Focus – Growth Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',Arial,sans-serif;
+  background:linear-gradient(180deg,#ecfdf5,#d1fae5,#a7f3d0);
+  color:#064e3b;
+}
+header{padding:20px 20px 0 20px;}
+.lead{
+  max-width:980px;
+  background:#ffffff;
+  border-radius:18px;
+  padding:16px 18px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.12);
+}
+.lead p{margin:0;color:#065f46;}
+
+.toolbar{display:flex;gap:12px;align-items:center;margin:14px 20px;}
+.toggle{
+  display:flex;align-items:center;gap:8px;background:#ffffff;padding:8px 10px;border-radius:999px;box-shadow:0 6px 16px rgba(0,0,0,0.12);
+}
+.toggle button{
+  border:none;border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600;
+}
+.toggle .active{background:#22c55e;color:#ffffff;}
+.toggle .inactive{background:#ecfeff;color:#065f46;}
+
+.weather{
+  margin-left:auto;
+  background:#fff7ed;color:#7c2d12;border-radius:999px;padding:8px 14px;box-shadow:0 6px 16px rgba(0,0,0,0.12);
+}
+
+h1{margin:20px;font-size:2.4em;color:#065f46;}
+.subtitle{margin-left:20px;color:#047857;font-size:1em;}
+
+.container{padding:20px;display:grid;grid-template-columns:repeat(12,1fr);gap:20px;}
+.card{background:#ffffff;border-radius:18px;padding:20px;box-shadow:0 10px 25px rgba(0,0,0,0.15);position:relative;}
+.card::before{content:"🌱";position:absolute;top:12px;right:14px;font-size:1.4em;opacity:0.35;}
+
+.metric{font-size:2.3em;font-weight:700;}
+.label{color:#047857;font-size:.9em;}
+.status{display:inline-block;padding:6px 14px;border-radius:999px;font-size:.8em;margin-top:10px;}
+.good{background:#86efac;color:#065f46;}
+.warn{background:#fde68a;color:#92400e;}
+
+.progressbar{width:100%;background:#ecfeff;border-radius:12px;overflow:hidden;height:16px;margin-top:12px;}
+.progress{height:100%;background:linear-gradient(90deg,#4ade80,#22c55e);width:72%;transition:width 1s ease;}
+canvas{margin-top:10px;}
+
+.col3{grid-column:span 3;}
+.col6{grid-column:span 6;}
+.col12{grid-column:span 12;}
+
+/* Narrative panel */
+.narrative h3{margin-top:0;color:#065f46;}
+.narrative ul{margin:8px 0 0 18px;color:#065f46;}
+
+footer{text-align:center;padding:16px;color:#065f46;}
+
+/* Clinical view tweaks */
+body.clinical{background:linear-gradient(180deg,#f8fafc,#e2e8f0,#cbd5e1);color:#020617;}
+body.clinical .lead, body.clinical .card{box-shadow:0 8px 18px rgba(0,0,0,0.16);} 
+body.clinical .card::before{content:"📊";}
+body.clinical .lead p, body.clinical .label, body.clinical .subtitle, body.clinical footer{color:#020617;}
+body.clinical .status.good{background:#dcfce7;color:#065f46;}
+body.clinical .status.warn{background:#fff7ed;color:#7c2d12;}
+</style>
+</head>
+<body class="human">
+
+<header>
+  <div class="lead">
+    <p><b>This dashboard looks at team energy the same way we look at growth —</b> focus is the sunlight, meetings are branches that need pruning, and burnout is soil health. If we monitor these early, performance takes care of itself.</p>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="toggle" aria-label="View toggle">
+    <button id="humanBtn" class="active" onclick="setView('human')">🌼 Human view</button>
+    <button id="clinicalBtn" class="inactive" onclick="setView('clinical')">📋 Clinical view</button>
+  </div>
+  <div class="weather" id="weatherAlert">⛅ Weather Alert: Light clouds — watch meeting load</div>
+</div>
+
+<h1>🌸 Team Energy & Focus Dashboard</h1>
+<p class="subtitle">Spring‑inspired view of team wellbeing, balance, and sustainable growth</p>
+
+<div class="container">
+
+  <!-- Animated Metrics -->
+  <div class="card col3">
+    <div class="metric" id="focusHours">0</div>
+    <div class="label" data-human="Daily Focus Hours" data-clinical="Avg. Focus Hours / Day">Daily Focus Hours</div>
+    <span class="status good" id="focusStatus">🌼 Blooming</span>
+  </div>
+
+  <div class="card col3">
+    <div class="metric" id="meetingLoad">0%</div>
+    <div class="label" data-human="Meeting Load" data-clinical="% Time in Meetings">Meeting Load</div>
+    <span class="status warn" id="meetingStatus">🍃 Needs Pruning</span>
+  </div>
+
+  <div class="card col3">
+    <div class="metric" id="energyScore">0</div>
+    <div class="label" data-human="Energy Index" data-clinical="Composite Energy Score">Energy Index</div>
+    <span class="status good" id="energyStatus">🌞 Thriving</span>
+  </div>
+
+  <div class="card col3">
+    <div class="metric" id="burnoutRisk">0%</div>
+    <div class="label" data-human="Burnout Risk" data-clinical="Burnout Probability">Burnout Risk</div>
+    <span class="status warn" id="burnoutStatus">🌿 Watch Soil</span>
+  </div>
+
+  <!-- Progress Tracker -->
+  <div class="card col12">
+    <h3>🌳 Focus Growth Goal (Quarter)</h3>
+    <div class="progressbar"><div class="progress"></div></div>
+    <p class="label">72% toward a healthier work rhythm</p>
+  </div>
+
+  <!-- Narrative summary -->
+  <div class="card col12 narrative">
+    <h3>🪴 This Week: What’s Growing / What Needs Care</h3>
+    <ul id="narrativeList">
+      <li><b>Growing:</b> Focus hours stabilized mid‑week; energy trend is rising.</li>
+      <li><b>Needs care:</b> Meetings crept up on Thursday; watch overload signals.</li>
+      <li><b>Action:</b> Protect two deep‑work blocks next week; prune recurring meetings.</li>
+    </ul>
+  </div>
+
+  <!-- Charts -->
+  <div class="card col6"><h3>🌻 Focus vs Meetings</h3><canvas id="barChart"></canvas></div>
+  <div class="card col6"><h3>🌤 Energy Trend Over Time</h3><canvas id="lineChart"></canvas></div>
+  <div class="card col6"><h3>🍀 Workload Distribution</h3><canvas id="pieChart"></canvas></div>
+  <div class="card col6"><h3>🌈 Balance & Recovery</h3><canvas id="radarChart"></canvas></div>
+
+</div>
+
+<footer>🌸 Healthy teams grow best with balance, light, and care.</footer>
+
+<script>
+// View toggle
+function setView(mode){
+  document.body.className = mode;
+  document.getElementById('humanBtn').className = mode==='human' ? 'active':'inactive';
+  document.getElementById('clinicalBtn').className = mode==='clinical' ? 'active':'inactive';
+  document.querySelectorAll('.label').forEach(l=>{
+    l.textContent = mode==='human' ? l.dataset.human : l.dataset.clinical;
+  });
+  document.getElementById('focusStatus').textContent = mode==='human' ? '🌼 Blooming' : 'On Track';
+  document.getElementById('meetingStatus').textContent = mode==='human' ? '🍃 Needs Pruning' : 'Elevated';
+  document.getElementById('energyStatus').textContent = mode==='human' ? '🌞 Thriving' : 'Strong';
+  document.getElementById('burnoutStatus').textContent = mode==='human' ? '🌿 Watch Soil' : 'Moderate Risk';
+  document.getElementById('weatherAlert').textContent = mode==='human'
+    ? '⛅ Weather Alert: Light clouds — watch meeting load'
+    : '⚠️ Attention: Meeting load trending upward';
+}
+
+// Animated counters
+function animateValue(id, start, end, duration, suffix=''){
+  let range=end-start, stepTime=Math.abs(Math.floor(duration/range)), current=start;
+  const el=document.getElementById(id);
+  const timer=setInterval(()=>{ current++; el.textContent=current+suffix; if(current>=end)clearInterval(timer); },stepTime);
+}
+
+animateValue('focusHours',0,6,900);
+animateValue('meetingLoad',0,38,900,'%');
+animateValue('energyScore',0,82,900);
+animateValue('burnoutRisk',0,23,900,'%');
+
+// Charts
+new Chart(barChart,{type:'bar',data:{labels:['Mon','Tue','Wed','Thu','Fri'],datasets:[{label:'Focus Hours',data:[5,6,6.5,5.8,6],backgroundColor:'#4ade80'},{label:'Meeting Hours',data:[3,4,3.5,4.2,3],backgroundColor:'#fca5a5'}]}});
+new Chart(lineChart,{type:'line',data:{labels:['Week 1','Week 2','Week 3','Week 4'],datasets:[{label:'Energy Score',data:[74,78,80,82],borderColor:'#22c55e',tension:0.4}]}});
+new Chart(pieChart,{type:'pie',data:{labels:['Deep Work','Meetings','Admin','Learning'],datasets:[{data:[40,30,20,10],backgroundColor:['#4ade80','#fca5a5','#fde68a','#86efac']}]} });
+new Chart(radarChart,{type:'radar',data:{labels:['Focus','Recovery','Clarity','Collaboration','Workload'],datasets:[{label:'Balance',data:[80,70,85,75,65],borderColor:'#34d399',backgroundColor:'rgba(52,211,153,0.35)'}]}});
+</script>
+
+</body>
+</html>
